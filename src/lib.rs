@@ -29,11 +29,11 @@ impl<'a> Iterator for &EntryIter<'a> {
         let mut iter_stack = self.iter_stack.borrow_mut();
         let mut path = self.path.borrow_mut();
         loop {
+            if let Some(Entry::File(_)) = path.last() { // Pop last element from child folder if a file
+                path.pop();
+            } 
             match iter_stack.last_mut().and_then(|x| x.next()) {
                 Some(entry) => {
-                    if let Some(Entry::File(_)) = path.last() {
-                        path.pop();
-                    }
                     if let Entry::Folder(folder) = entry {
                         iter_stack.push(folder.entries.iter());
                     }
@@ -42,9 +42,6 @@ impl<'a> Iterator for &EntryIter<'a> {
                 }
                 None => {
                     iter_stack.pop();
-                    if let Some(Entry::File(_)) = path.last() { // Pop last element from child folder if a file
-                        path.pop();
-                    } 
                     path.pop(); // Pop folder itself
                     if iter_stack.is_empty() {
                         return None;
