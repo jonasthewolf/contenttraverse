@@ -54,7 +54,7 @@ impl<'a> Iterator for &EntryIter<'a> {
 }
 
 impl<'a> EntryIter<'a> {
-    pub fn get_path(&self, separator: &str) -> String {
+    pub fn get_current_path(&self, separator: &str) -> String {
         self.path
             .borrow()
             .iter()
@@ -70,7 +70,7 @@ impl<'a> EntryIter<'a> {
         for iter in self {
             if let Entry::File(f) = iter {
                 if f.name == filename {
-                    return Some(self.get_path(separator));
+                    return Some(self.get_current_path(separator));
                 }
             }
         }
@@ -100,7 +100,7 @@ mod test {
         let mut output = vec![];
         let ci = content.iter();
         for x in &ci {
-            output.push(format!("{}", ci.get_path("/")));
+            output.push(format!("{}", ci.get_current_path("/")));
             if let Entry::File(f) = x {
                 if f.name == "b.txt" {
                     output.push(format!("b.txt found"));
