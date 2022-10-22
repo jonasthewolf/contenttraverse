@@ -1,5 +1,7 @@
 use std::cell::RefCell;
 
+use regex::Regex;
+
 // #[derive(Debug, Default)]
 pub struct File {
     name: String,
@@ -67,9 +69,13 @@ impl<'a> EntryIter<'a> {
     }
 
     pub fn find_file(&self, filename: &str, separator: &str) -> Option<String> {
+        self.match_file(&Regex::new(&regex::escape(filename)).unwrap(), separator)
+    }
+
+    pub fn match_file(&self, filename: &Regex, separator: &str) -> Option<String> {
         for iter in self {
             if let Entry::File(f) = iter {
-                if f.name == filename {
+                if filename.is_match(&f.name) {
                     return Some(self.get_current_path(separator));
                 }
             }
@@ -128,7 +134,9 @@ mod test {
     #[test]
     fn find_test() {
         assert_eq!(
-            get_content().iter().find_file("b.txt", "/"),
+            get_content()
+                .iter()
+                .match_file(&Regex::new(r"b\..*").unwrap(), "/"),
             Some("a/b.txt".to_owned())
         );
         assert_eq!(get_content().iter().find_file("h", "/"), None);
